@@ -7,7 +7,6 @@ library(caret)
 library(tm)
 library(caret)
 library(ROCR)
-install.packages("pROC")  
 library(pROC)
 
 
@@ -18,11 +17,9 @@ NewsTest = read.csv("NYTimesBlogTest.csv", stringsAsFactors=FALSE)
 #bind them and start making vars
 bind=rbind(NewsTrain[, !(colnames(NewsTrain) %in% "Popular")], NewsTest)
 
-#make bond test and train
+#make bind test and train
 bindTrain = head(bind, nrow(newstrain))
 bindTest = tail(bind, nrow(newstest))
-
-
 
 #make variables/ format variables 
 bind$PubDate = strptime(bind$PubDate, "%Y-%m-%d %H:%M:%S")
@@ -80,7 +77,7 @@ bind$HNoCategories = as.factor(as.numeric(ifelse(grepl("Daily Clip Report|Today 
 
 $Headline,ignore.case=TRUE), 1,0)))
 
-#Lenght of headline and abstarct len. delete old
+#Lenght of headline and abstarct length
 bind$HLenChar=nchar(bind$Headline)
 bind$ALenChar=nchar(bind$Abstract)
 
@@ -93,9 +90,7 @@ CorpusHeadline = Corpus(VectorSource(c(NewsTrain$Headline, NewsTest$Headline)))
 CorpusHeadline = tm_map(CorpusHeadline, tolower)
 CorpusHeadline = tm_map(CorpusHeadline, PlainTextDocument)
 CorpusHeadline = tm_map(CorpusHeadline, removePunctuation)
-CorpusHeadline = tm_map(CorpusHeadline, removeWords, c("2014", "2015","times","new york","nytimes","new york 
-
-times","new","york","vebrabtim","upshot","today","fashion","week","playlist","report","archives","spring","summer", "morning",  stopwords("english")))
+CorpusHeadline = tm_map(CorpusHeadline, removeWords, c("2014", "2015","times","new york","nytimes","new york times","new","york","vebrabtim","upshot","today","fashion","week","playlist","report","archives","spring","summer", "morning",  stopwords("english")))
 CorpusHeadline = tm_map(CorpusHeadline, stemDocument)
 
 dtmHL = DocumentTermMatrix(CorpusHeadline)
@@ -107,16 +102,13 @@ colnames(HeadlineWords) = paste("H", colnames(HeadlineWords))
 #make sure variable names are okay for R
 colnames(HeadlineWords) = make.names(colnames(HeadlineWords))
 
-#тext Analytics: finding top 1% words in headline
+#тext Analytics: finding top 2% words in headline
 #Abstract - cleared from brand name, some frequent not important words
 CorpusAbstract = Corpus(VectorSource(c(NewsTrain$Abstract, NewsTest$Abstract)))
 CorpusAbstract = tm_map(CorpusAbstract, tolower)
 CorpusAbstract = tm_map(CorpusAbstract, PlainTextDocument)
 CorpusAbstract = tm_map(CorpusAbstract, removePunctuation)
-CorpusAbstract = tm_map(CorpusAbstract, removeWords, c("new york","york","new york times","nytimes","ny times","the 
-
-times","times","new","slideshow","daily","clip","report","herald", "tribune", 
-
+CorpusAbstract = tm_map(CorpusAbstract, removeWords, c("new york","york","new york times","nytimes","ny times","the times","times","new","slideshow","daily","clip","report","herald", "tribune", 
 "archives","paragraphs","highlights","Metropolitan","photos","scenes","fashion","week","plucks","photographer", stopwords("english")))
 CorpusAbstract = tm_map(CorpusAbstract, stemDocument)
 
@@ -130,9 +122,6 @@ colnames(AbstractWords) = paste ("A", colnames(AbstractWords))
 colnames(AbstractWords) = make.names(colnames(AbstractWords))
 
 NewsAllWords = cbind(HeadlineWords, AbstractWords,row.names=NULL) 
-
-
-
 
 #Add all variables to new data frame that has the mined words from Headlines and Abstract of articles
 NewsAllWords$logWordCount = bind$logWordCount
@@ -158,7 +147,6 @@ NewsAllWords$HCancer=bind$HCancer
 NewsAllWords$AStop=bind$AStop
 NewsAllWords$HNoCategories=bind$HNoCategories
 
-
 #seprate the final bind into train and test
 NewsAllWordsTrain = head(NewsAllWords, nrow(train))
 NewsAllWordsTest = tail(NewsAllWords, nrow(test))
@@ -169,7 +157,6 @@ NewsAllWordsTrain$Popular = as.factor(train$Popular)
 #Add the cancer/doctor/depression/stress var
 NewsAllWordsTrain$HhealthRelat = head(bind$HhealthRelat, nrow(train))
 NewsAllWordsTest$HhealthRelat = tail(bind$HhealthRelat, nrow(test))
-
 
 
 #Run before doing random forest
