@@ -21,7 +21,6 @@ bind=rbind(train[, !(colnames(train) %in% "Popular")], test)
 bindTrain = head(bind, nrow(train))
 bindTest = tail(bind, nrow(test))
 
-
 #make variables/ format variables 
 bind$PubDate = strptime(bind$PubDate, "%Y-%m-%d %H:%M:%S")
 bind$Weekday = bind$PubDate$wday
