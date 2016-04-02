@@ -1,4 +1,3 @@
-# Analytics-Edge-2015_Kaggle-Competition
 library(rpart)
 library(rpart.plot)
 library(randomForest)
@@ -10,16 +9,19 @@ library(ROCR)
 install.packages("pROC")  
 library(pROC)
 
+
 # make train and test
-train = read.csv("NYTimesBlogTrain.csv", stringsAsFactors=FALSE)
-test = read.csv("NYTimesBlogTest.csv", stringsAsFactors=FALSE)
+NewsTrain = read.csv("NYTimesBlogTrain.csv", stringsAsFactors=FALSE)
+NewsTest = read.csv("NYTimesBlogTest.csv", stringsAsFactors=FALSE)
 
 #bind them and start making vars
-bind=rbind(train[, !(colnames(train) %in% "Popular")], test)
+bind=rbind(NewsTrain[, !(colnames(NewsTrain) %in% "Popular")], NewsTest)
 
 #make bond test and train
-bindTrain = head(bind, nrow(train))
-bindTest = tail(bind, nrow(test))
+bindTrain = head(bind, nrow(newstrain))
+bindTest = tail(bind, nrow(newstest))
+
+
 
 #make variables/ format variables 
 bind$PubDate = strptime(bind$PubDate, "%Y-%m-%d %H:%M:%S")
@@ -84,13 +86,15 @@ bind$ALenChar=nchar(bind$Abstract)
 #Health related words in headline - doctor, depression, cancer in Headline
 bind$HhealthRelat = as.factor(as.numeric(ifelse(grepl("doctor|cancer|depression|stress",bind$Headline,ignore.case=TRUE), 1,0)))
 
-
+#тext Analytics: finding top 1% words in headline
 #Headlines - cleared from 2014, 2015, brand name, other frequent but not important words
 CorpusHeadline = Corpus(VectorSource(c(NewsTrain$Headline, NewsTest$Headline)))
 CorpusHeadline = tm_map(CorpusHeadline, tolower)
 CorpusHeadline = tm_map(CorpusHeadline, PlainTextDocument)
 CorpusHeadline = tm_map(CorpusHeadline, removePunctuation)
-CorpusHeadline = tm_map(CorpusHeadline, removeWords, c("2014", "2015","times","new york","nytimes","new york times","new","york","vebrabtim","upshot","today","fashion","week","playlist","report","archives","spring","summer", "morning",  stopwords("english")))
+CorpusHeadline = tm_map(CorpusHeadline, removeWords, c("2014", "2015","times","new york","nytimes","new york 
+
+times","new","york","vebrabtim","upshot","today","fashion","week","playlist","report","archives","spring","summer", "morning",  stopwords("english")))
 CorpusHeadline = tm_map(CorpusHeadline, stemDocument)
 
 dtmHL = DocumentTermMatrix(CorpusHeadline)
@@ -99,8 +103,10 @@ findFreqTerms(sparseHL, lowfreq=10)
 
 HeadlineWords = as.data.frame(as.matrix(sparseHL))
 colnames(HeadlineWords) = paste("H", colnames(HeadlineWords))
+#make sure variable names are okay for R
 colnames(HeadlineWords) = make.names(colnames(HeadlineWords))
 
+#тext Analytics: finding top 1% words in headline
 #Abstract - cleared from brand name, some frequent not important words
 CorpusAbstract = Corpus(VectorSource(c(NewsTrain$Abstract, NewsTest$Abstract)))
 CorpusAbstract = tm_map(CorpusAbstract, tolower)
@@ -119,10 +125,12 @@ findFreqTerms(sparseAbstract, lowfreq=10)
 
 AbstractWords = as.data.frame(as.matrix(sparseAbstract))
 colnames(AbstractWords) = paste ("A", colnames(AbstractWords))
+#make sure variable names are okay for R
 colnames(AbstractWords) = make.names(colnames(AbstractWords))
 
-#create frame from words extracted from both the Headline and Abstract
 NewsAllWords = cbind(HeadlineWords, AbstractWords,row.names=NULL) 
+
+
 
 
 #Add all variables to new data frame that has the mined words from Headlines and Abstract of articles
@@ -161,6 +169,8 @@ NewsAllWordsTrain$Popular = as.factor(train$Popular)
 NewsAllWordsTrain$HhealthRelat = head(bind$HhealthRelat, nrow(train))
 NewsAllWordsTest$HhealthRelat = tail(bind$HhealthRelat, nrow(test))
 
+
+
 #Run before doing random forest
 levels(NewsAllWordsTrain$SectionName) = levels(NewsAllWordsTest$SectionName)
 levels(NewsAllWordsTrain$SubsectionName) = levels(NewsAllWordsTest$SubsectionName)
@@ -195,11 +205,10 @@ NewsAllWordsTest$WordCount = tail(bind$WordCount, nrow(test))
 NewsAllWordsTrain$logWordCount = NULL
 NewsAllWordsTest$logWordCount = NULL
 
-#Best Model AUC=0.92854
+#Best Model, AUC=0.92854
 set.seed=111
 RM48= randomForest(Popular~., data=NewsAllWordsTrain,nodezize=25,ntree=200)
 RM48Pred = predict(RM48, newdata=NewsAllWordsTest, type="prob")[,2]
 
-MySubmission = data.frame(UniqueID = bindTest$UniqueID, Probability1 = RM48Pred)
-write.csv(MySubmission, "RM_48.csv", row.names=FALSE)
-
+MySubmission48 = data.frame(UniqueID = bindTest$UniqueID, Probability1 = RM48Pred)
+write.csv(MySubmission48, "RM_48.csv", row.names=FALSE)
