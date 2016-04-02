@@ -1,5 +1,4 @@
-# Analytics-Edge-2015_Kaggle-Competition-
-Analytics-Edge-2015_Kaggle-Competition-
+# Analytics-Edge-2015_Kaggle-Competition
 library(rpart)
 library(rpart.plot)
 library(randomForest)
