@@ -199,9 +199,13 @@ NewsAllWordsTest$logWordCount = NULL
 numFolds4=trainControl(method="cv",number=10)
 cpGrid4=expand.grid(.cp=seq(0.001,0.04,0.001))
 train(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment,data=NewsAllWordsTrain,method="rpart", trControl=numFolds4,tuneGrid=cpGrid4)
+#Extract tree
+tr=train(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment,data=NewsAllWordsTrain,method="rpart", trControl=numFolds4,tuneGrid=cpGrid4)
+best.tree = tr$finalModel
+prp(best.tree)
 
 Cart33 = rpart(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment, data=NNewsAllWordsTrain, method="class",cp=0.003)
-predCart33=predict(Cart33, newdata=NewsAllWordsTest)[,2]
+predCart33=predict(Car3t3, newdata=NewsAllWordsTest)[,2]
 
 MySubmission33 = data.frame(UniqueID = bindTest$UniqueID, Probability1 = predCart33)
 write.csv(MySubmission33, "CART_33.csv", row.names=FALSE)
