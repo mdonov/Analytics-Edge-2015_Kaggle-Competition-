@@ -198,11 +198,10 @@ NewsAllWordsTest$logWordCount = NULL
 #Cross validaion;CART - cp=0.003, AUC=0.87377
 numFolds4=trainControl(method="cv",number=10)
 cpGrid4=expand.grid(.cp=seq(0.001,0.04,0.001))
-train(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment,data=bindTrain,method="rpart", trControl=numFolds4,tuneGrid=cpGrid4)
+train(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment,data=NewsAllWordsTrain,method="rpart", trControl=numFolds4,tuneGrid=cpGrid4)
 
-Cart33 = rpart(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment, data=bindTrain, method="class",cp=0.003)
-predCart33=predict(Cart33, newdata=bindTrain)[,2]
-table(NewsTrain$Popular, predCart33>0.5)
+Cart33 = rpart(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment, data=NNewsAllWordsTrain, method="class",cp=0.003)
+predCart33=predict(Cart33, newdata=NewsAllWordsTest)[,2]
 
 MySubmission33 = data.frame(UniqueID = bindTest$UniqueID, Probability1 = predCart33)
 write.csv(MySubmission33, "CART_33.csv", row.names=FALSE)
