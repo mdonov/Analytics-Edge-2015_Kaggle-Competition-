@@ -186,13 +186,6 @@ NewsAllWordsTest$HStress = NULL
 NewsAllWordsTrain$Hdoctor = NULL
 NewsAllWordsTest$Hdoctor = NULL
 
-#add plain WordCount and remove the log one for the random forest
-NewsAllWordsTrain$WordCount = head(bind$WordCount, nrow(train))
-NewsAllWordsTest$WordCount = tail(bind$WordCount, nrow(test))
-
-NewsAllWordsTrain$logWordCount = NULL
-NewsAllWordsTest$logWordCount = NULL
-
 
 
 #Cross validaion;CART - cp=0.003, AUC=0.87377
@@ -210,6 +203,13 @@ predCart33=predict(Car3t3, newdata=NewsAllWordsTest)[,2]
 MySubmission33 = data.frame(UniqueID = bindTest$UniqueID, Probability1 = predCart33)
 write.csv(MySubmission33, "CART_33.csv", row.names=FALSE)
 
+
+#add plain WordCount and remove the log one for the random forest
+NewsAllWordsTrain$WordCount = head(bind$WordCount, nrow(train))
+NewsAllWordsTest$WordCount = tail(bind$WordCount, nrow(test))
+
+NewsAllWordsTrain$logWordCount = NULL
+NewsAllWordsTest$logWordCount = NULL
 
 #Best Model, AUC=0.92854
 set.seed=111
