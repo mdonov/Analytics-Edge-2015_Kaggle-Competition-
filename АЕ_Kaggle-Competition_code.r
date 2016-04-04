@@ -193,6 +193,21 @@ NewsAllWordsTest$WordCount = tail(bind$WordCount, nrow(test))
 NewsAllWordsTrain$logWordCount = NULL
 NewsAllWordsTest$logWordCount = NULL
 
+
+
+#Cross validaion;CART - cp=0.003, AUC=0.87377
+numFolds4=trainControl(method="cv",number=10)
+cpGrid4=expand.grid(.cp=seq(0.001,0.04,0.001))
+train(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment,data=bindTrain,method="rpart", trControl=numFolds4,tuneGrid=cpGrid4)
+
+Cart33 = rpart(Popular ~ logWordCount + SectionName + SubsectionName + NewsDesk+ Weekday + Hour +IsQuestion+ObamaHL+Recap+AskWell+ReadersRespond+NoComment+ OpenComment, data=bindTrain, method="class",cp=0.003)
+predCart33=predict(Cart33, newdata=bindTrain)[,2]
+table(NewsTrain$Popular, predCart33>0.5)
+
+MySubmission33 = data.frame(UniqueID = bindTest$UniqueID, Probability1 = predCart33)
+write.csv(MySubmission33, "CART_33.csv", row.names=FALSE)
+
+
 #Best Model, AUC=0.92854
 set.seed=111
 RM48= randomForest(Popular~., data=NewsAllWordsTrain,nodezize=25,ntree=200)
