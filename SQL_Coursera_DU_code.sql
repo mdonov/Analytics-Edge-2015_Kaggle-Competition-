@@ -29,6 +29,36 @@ ORDER BY sub.MonthlyChange DESC;
 
 
 
+--Which department within a particular store had the greatest decrease in average daily sales revenue from 
+--August to September, and in what city and state was that store located?
+
+select
+         di.deptdesc,sk.dept,tr.store,   
+
+         count (distinct
+         (Case when extract(month from tr.saledate)=8 then tr.saledate END)) nDaysAug,
+         count(distinct
+         (Case when extract(month from tr.saledate)=9 then tr.saledate END)) nDaysSep,
+
+         sum(case when extract(month from tr.saledate)=8 then tr.amt END) as augRev,
+         sum(case when extract(month from tr.saledate)=9 then tr.amt END) as sepRev,
+
+         (sepRev/nDaysSep - augRev/nDaysAug) as MonthDiff,
+         str.city, str.state
+
+from trnsact tr 
+JOIN strinfo as str ON str.store=tr.store
+JOIN skuinfo as sk ON sk.sku=tr.sku
+JOIN deptinfo di ON di.dept=sk.dept
+
+WHERE tr.stype='P' AND NOT (extract(month from tr.saledate)=8 AND extract(year from tr.saledate)=2005)
+HAVING nDaysAug>=20 AND nDaysSep>=20 AND AugRev>1000 AND SepRev>1000
+
+group by sk.dept,tr.store,di.deptdesc, str.city, str.state
+order by MonthDiff asc
+
+
+
 --Compare the average daily revenue of the store with the highest msa_income and the store with the lowest median 
 --msa_income (according to the msa_income field). In what city and state were these two stores, and which store had 
 -- a higher average daily revenue? 
